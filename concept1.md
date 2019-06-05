@@ -1,4 +1,4 @@
-## Operator 演算子とは
+## 演算子(Operator)とは
 
 レッスン1で演算子については簡単に算術演算子を学びました。算術演算子には数学の考えに似たものが多く含まれているため、理解しやすかったかもしれません。
 
@@ -125,38 +125,79 @@ console.log(!y); // true
 
 数学で()で囲まれているところは優先順位が上がるので先に計算するルールがあります。グループ化演算子もこれと同じで、()で囲まれている箇所は、演算子の優先順位を上位に変えます。
 
+例えば以下の例ですと、`a > 7`の比較と、`(a + b === 15 || a - b > 0)`の比較の両方の結果がtrueかどうかの判断をしています。
+
+```js
+const a = 8;
+const b = 9;
+const c = 10;
+
+if (a > 7 && (a + b === 15 || a - b > 0)) {
+  console.log('trueが返りました。')
+} else {
+  console.log('falseが返りました。')
+}
+```
+
+<iframe width="100%" height="300" src="//jsfiddle.net/codegrit_hiro/jb329erw/2/embedded/js,result/dark/" allowfullscreen="allowfullscreen" allowpaymentrequest frameborder="0"></iframe>
+
 ## typeof演算子
 
-**_typeof演算子_**は実は批判を呼んでいる演算子で、JavaScriptの7つのデータ型とオブジェクトに正確に対応できていない演算子です。
+**_typeof演算子_**は、ある変数の値がどのtypeに属しているのかを返す演算子です。例えば、`undefined`の判定を行うには以下のように書きます。
 
-どういうことかというと、プリミティブ型であるはずの`null`をオブジェクトとして返すなど、普段であればいわゆるバグの対応をしてしまうのです。
-なぜいまだに修正が行われないのかということになるのですが、いまだにこの仕様に依存している既存コードがあるため、なかなか言語仕様から外すことができないようです。
-ただ、思わぬ戻り値を返すので、それだけはポイントを押さえておきましょう。
+```js
+let i;
+console.log(i); // undefined
+console.log(typeof i); // undefined
+console.log(typeof i === 'undefined'); // true
+```
 
-配列と配列でない非配列とを正確に区別できない仕様も問題視されています。
+<iframe width="100%" height="300" src="//jsfiddle.net/codegrit_hiro/mpqz5ych/1/embedded/js,result/dark/" allowfullscreen="allowfullscreen" allowpaymentrequest frameborder="0"></iframe>
 
-**_typeof演算子_**の戻り値一覧を参考にしておくと、今後思わぬ結果が出ても仕様の問題だという判断がすぐつくようになるでしょう。
+以下は、**_typeof演算子_**の戻り値一覧です。
 
 | 式 | 戻り値 |
 | -------- | -------- |
 | typeof undefined | "undefined" |
-| typeof null | "object"（本来ならプリミティブ） |
-| typeof {} | "object" |
-[ typeof [] | "object" |
 | typeof true | "boolean" |
 | typeof 1 | "number" |
 | typeof "" | "string" |
 | typeof Symbol() | "symbol"（ES6から追加された） |
 | typeof function() {} | "function" |
+| typeof {} | "object" |
+[ typeof [] | "object" |
+| typeof null | "object"（本来ならプリミティブ） |
 
-## void演算子
+注意点として、typeof演算子には数十年に渡って残り続けているバグがあります。それは`null`の判断を行うと、`object`という値が返ってきてしまうことです。
 
-**_void演算子_**は被演算子（演算の対象）である値や変数を評価（evaluate）して`undefined`を戻り値として返します。
-実はあまり実用性がない演算子ですが、たまにHTMLのアンカータグで以下のように出てきます。
-
-```html
-<a href="javascript:void 0">ブラウザが新しいページに移動しないようにする</a>
+```js
+let i = null;
+console.log(i); // null
+console.log(typeof i); // object
 ```
-上記の通り、ブラウザが新しいページに移動しないようにするために使用されています。
-よく見かけますが、実際はあまり推奨される書き方ではありません。
-ただ、目にする機会は必ずあるので覚えておくと良いです。
+
+<iframe width="100%" height="300" src="//jsfiddle.net/codegrit_hiro/zg1y6fpn/1/embedded/js,result/dark/" allowfullscreen="allowfullscreen" allowpaymentrequest frameborder="0"></iframe>
+
+なぜこのバグが残り続けているかというと、JSの歴史は長くこの仕様に依存している既存のアプリケーションがあるため、バグを修正することで新たなバグが生み出されるためです。nullと同じようにobjectという値が返ってくるのはObject型とArray型の2つなのでこの2つを判定したい場合は気をつけましょう。
+
+```js
+let person = {name: 'Kei', age: 28 };
+// 何かのミスでpersonがnullになってしまったと想定
+person = null;
+
+if (typeof person === 'object') { // 
+  return person.name; // personはnullなのでエラーが発生する。
+}
+```
+
+ある変数がnullかどうかの判断をするには以下のようにするのが最も簡単です。
+
+```js
+let person = {name: 'Kei', age: 28 };
+// 何かのミスでpersonがnullになってしまったと想定
+person = null;
+
+if (person) { // personがnullでなければtrueを返す。
+  return person.name;
+}
+```
